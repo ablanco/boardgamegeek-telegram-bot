@@ -1,0 +1,25 @@
+{
+  "name": "boardgamegeek-telegram-bot",
+  "version": "0.0.1",
+  "description": "A Telegram bot for the BoardGameGeek.",
+  "author": "Alejandro Blanco <alejandro.b.e@gmail.com>",
+  "homepage": "https://github.com/ablanco/boardgamegeek-telegram-bot",
+  "bugs": {
+    "url": "https://github.com/ablanco/boardgamegeek-telegram-bot/issues"
+  },
+  "keywords": [
+    "telegram",
+    "boardgamegeek",
+    "bgg",
+    "boardgame",
+    "bot"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ablanco/boardgamegeek-telegram-bot.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.23.3"
+  }
+}
