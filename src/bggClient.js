@@ -3,6 +3,8 @@
 
 const http = require('http');
 
+const parse = require('xml2js').parseString;
+
 // https://www.boardgamegeek.com/xmlapi2/search?query=euphrat
 // https://www.boardgamegeek.com/xmlapi2/thing/?id=42&type=boardgame
 
@@ -23,7 +25,14 @@ const client = {
                 data = data + chunk;
             });
             response.on('end', function () {
-                callback(data);
+                // callback(parse(data));
+                parse(data, function (e, result) {
+                    if (e === null) {
+                        callback(result.items.item);
+                    } else {
+                        callback(e);
+                    }
+                });
             });
         });
 

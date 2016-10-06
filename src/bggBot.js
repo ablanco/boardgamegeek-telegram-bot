@@ -15,7 +15,19 @@ bot.onText(/(.+)/, function (msg) {
     const fromId = msg.from.id;
 
     bggClient.search(msg.text, function (response) {
-        bot.sendMessage(fromId, response);
+        // if (response.hasOwnProperty('forEach')) {
+        response.forEach(function (game) {
+            // {"$":{"type":"boardgame","id":"140934"},
+            // "name":[{"$":{"type":"primary","value":"Arboretum"}}],
+            // "yearpublished":[{"$":{"value":"2015"}}]}
+            const name = game.name[0]['$'].value;
+            const year = game.yearpublished[0]['$'].value;
+
+            bot.sendMessage(fromId, `${name} (${year})`);
+        });
+        // } else {
+            // bot.sendMessage(fromId, response);
+        // }
     });
 });
 
