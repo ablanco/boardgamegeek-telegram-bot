@@ -47,6 +47,20 @@ client.parseXML = function (text) {
     });
 };
 
+client.processRequest = function (options) {
+    return new Promise(function (resolve, reject) {
+        client.makeRequest(options).then(function (xml) {
+            client.parseXML(xml).then(function (data) {
+                resolve(data.items.item);
+            }).catch(function (error) {
+                reject(error);
+            });
+        }).catch(function (error) {
+            reject(error);
+        });
+    });
+};
+
 // METHODS ////////////////////////////////////////////////////////////////////
 
 // https://www.boardgamegeek.com/xmlapi2/search?query=high+frontier&type=boardgame,boardgameexpansion
@@ -69,6 +83,18 @@ client.search = function (query, callback) {
     }).catch(function (error) {
         callback(error);
     });
+};
+
+// https://www.boardgamegeek.com/xmlapi2/thing/?id=173064
+
+client.gameDetails = function (id) {
+    const options = {
+        hostname: 'www.boardgamegeek.com',
+        path: `\/xmlapi2\/thing\?id\=${id}`,
+        method: 'GET'
+    };
+
+    return client.processRequest(options);
 };
 
 module.exports = client;
