@@ -16,9 +16,9 @@ const bot = new TelegramBot(settings.token, {polling: true});
 bot.onText(/\/search\ (.+)/, function (msg, match) {
     const fromId = msg.from.id;
 
-    bggClient.search(match[1], function (response) {
-        if (_.isArray(response)) {
-            const text = _.map(response, function (game) {
+    bggClient.search(match[1]).then(function (results) {
+        if (_.isArray(results)) {
+            const text = _.map(results, function (game) {
                 const name = _.get(game, 'name[0].$.value', 'Unknown');
                 const year = _.get(game, 'yearpublished[0].$.value');
                 const id = _.get(game, '$.id');
@@ -28,11 +28,13 @@ bot.onText(/\/search\ (.+)/, function (msg, match) {
                 return `${name} - ${id}`;
             }).join('\n');
             bot.sendMessage(fromId, text);
-        } else if (_.isUndefined(response)) {
+        } else if (_.isUndefined(results)) {
             bot.sendMessage(fromId, 'No results');
         } else {
-            bot.sendMessage(fromId, `Error: ${response}`);
+            bot.sendMessage(fromId, 'No response');
         }
+    }).catch(function (error) {
+        bot.sendMessage(fromId, `Error: ${error}`);
     });
 });
 
@@ -40,11 +42,17 @@ bot.onText(/\/game\ (.+)/, function (msg, match) {
     const fromId = msg.from.id;
 
     bggClient.gameDetails(match[1]).then(function (results) {
-        const game = _.head(results);
-        const name = _.get(game, 'name[0].$.value');
-        const description = _.get(game, 'description[0]', '');
+        if (_.isArray(results)) {
+            const game = _.head(results);
+            const name = _.get(game, 'name[0].$.value');
+            const description = _.get(game, 'description[0]', '');
 
-        bot.sendMessage(fromId, `${name}\n${description}`);
+            bot.sendMessage(fromId, `${name}\n${description}`);
+        } else if (_.isUndefined(results)) {
+            bot.sendMessage(fromId, 'No results');
+        } else {
+            bot.sendMessage(fromId, 'No response');
+        }
     }).catch(function (error) {
         bot.sendMessage(fromId, `Error: ${error}`);
     });

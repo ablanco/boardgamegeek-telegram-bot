@@ -13,7 +13,7 @@ const client = {};
 
 // UTILS //////////////////////////////////////////////////////////////////////
 
-client.makeRequest = function (options) {
+client.httpRequest = function (options) {
     return new Promise(function (resolve, reject) {
         let data = '';
 
@@ -47,9 +47,9 @@ client.parseXML = function (text) {
     });
 };
 
-client.processRequest = function (options) {
+client.makeRequest = function (options) {
     return new Promise(function (resolve, reject) {
-        client.makeRequest(options).then(function (xml) {
+        client.httpRequest(options).then(function (xml) {
             client.parseXML(xml).then(function (data) {
                 resolve(data.items.item);
             }).catch(function (error) {
@@ -65,7 +65,7 @@ client.processRequest = function (options) {
 
 // https://www.boardgamegeek.com/xmlapi2/search?query=high+frontier&type=boardgame,boardgameexpansion
 
-client.search = function (query, callback) {
+client.search = function (query) {
     query = query.replace(/\s/g, '+');
 
     const options = {
@@ -74,15 +74,7 @@ client.search = function (query, callback) {
         method: 'GET'
     };
 
-    client.makeRequest(options).then(function (xml) {
-        client.parseXML(xml).then(function (data) {
-            callback(data.items.item);
-        }).catch(function (error) {
-            callback(error);
-        });
-    }).catch(function (error) {
-        callback(error);
-    });
+    return client.makeRequest(options);
 };
 
 // https://www.boardgamegeek.com/xmlapi2/thing/?id=173064
@@ -94,7 +86,7 @@ client.gameDetails = function (id) {
         method: 'GET'
     };
 
-    return client.processRequest(options);
+    return client.makeRequest(options);
 };
 
 module.exports = client;
