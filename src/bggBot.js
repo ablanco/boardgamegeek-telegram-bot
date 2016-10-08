@@ -14,20 +14,22 @@ const settings = require('./settings.js');
 const bot = new TelegramBot(settings.token, {polling: true});
 
 // Any kind of message
-bot.onText(/(.+)/, function (msg) {
+bot.onText(/\/search\ (.+)/, function (msg, match) {
     const fromId = msg.from.id;
 
-    bggClient.search(msg.text, function (response) {
+    bggClient.search(match[1], function (response) {
         if (_.isArray(response)) {
-            response.forEach(function (game) {
-                // {"$":{"type":"boardgame","id":"140934"},
-                // "name":[{"$":{"type":"primary","value":"Arboretum"}}],
-                // "yearpublished":[{"$":{"value":"2015"}}]}
-                const name = game.name[0]['$'].value;
-                const year = game.yearpublished[0]['$'].value;
-
-                bot.sendMessage(fromId, `${name} (${year})`);
-            });
+            const text = _.map(response, function (game) {
+                const name = _.get(game, 'name[0].$.value', 'Unknown');
+                const year = _.get(game, 'yearpublished[0].$.value');
+                if (!_.isUndefined(year)) {
+                    return `${name} (${year})`;
+                }
+                return name;
+            }).join('\n');
+            bot.sendMessage(fromId, text);
+        } else if (_.isUndefined(response)) {
+            bot.sendMessage(fromId, 'No results');
         } else {
             bot.sendMessage(fromId, `Error: ${response}`);
         }

@@ -9,6 +9,8 @@ const parse = require('xml2js').parseString;
 
 const client = {};
 
+// https://boardgamegeek.com/wiki/page/BGG_XML_API2
+
 // UTILS //////////////////////////////////////////////////////////////////////
 
 client.makeRequest = function (options) {
@@ -36,6 +38,7 @@ client.parseXML = function (text) {
     return new Promise(function (resolve, reject) {
         parse(text, function (e, result) {
             if (e === null) {
+                // console.log(JSON.stringify(result));
                 resolve(result);
             } else {
                 reject(e);
@@ -46,12 +49,14 @@ client.parseXML = function (text) {
 
 // METHODS ////////////////////////////////////////////////////////////////////
 
+// https://www.boardgamegeek.com/xmlapi2/search?query=high+frontier&type=boardgame,boardgameexpansion
+
 client.search = function (query, callback) {
-    query = query.replace(/\s/, '+');
+    query = query.replace(/\s/g, '+');
 
     const options = {
         hostname: 'www.boardgamegeek.com',
-        path: `\/xmlapi2\/search\?query\=${query}&type=boardgame,boardgameexpansion`,
+        path: `\/xmlapi2\/search\?query\=${query}\&type\=boardgame\,boardgameexpansion`,
         method: 'GET'
     };
 
