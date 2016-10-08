@@ -1,4 +1,7 @@
 # boardgamegeek-telegram-bot
+
+[![Code Climate](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot/badges/gpa.svg)](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot)
+
 A Telegram bot for the BoardGameGeek
 
 ## Boring Legal Stuff
