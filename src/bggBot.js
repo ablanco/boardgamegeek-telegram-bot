@@ -6,12 +6,16 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const _ = require('lodash');
+const uuid = require('node-uuid');
 
 const bggClient = require('./bggClient.js');
 const settings = require('./settings.js');
 
+// TELEGRAM BOT ///////////////////////////////////////////////////////////////
 
 const bot = new TelegramBot(settings.token, {polling: true});
+
+// COMMANDS ///////////////////////////////////////////////////////////////////
 
 bot.onText(/\/search\ (.+)/, function (msg, match) {
     const fromId = msg.from.id;
@@ -55,6 +59,51 @@ bot.onText(/\/game\ (.+)/, function (msg, match) {
         }
     }).catch(function (error) {
         bot.sendMessage(fromId, `Error: ${error}`);
+    });
+});
+
+// INLINE /////////////////////////////////////////////////////////////////////
+
+bot.on('inline_query', function (request) {
+    const id = request.id;
+
+    bggClient.search(request.query).then(function (results) {
+        if (_.isArray(results)) {
+            let games = _.map(results, function (game) {
+                const gameId = _.get(game, '$.id', null);
+
+                if (_.isNull(gameId)) {
+                    return null;
+                }
+
+                const name = _.get(game, 'name[0].$.value', 'Unknown');
+                const year = _.get(game, 'yearpublished[0].$.value');
+                const result = {type: 'article'};
+
+                result.id = uuid.v4();
+                result.title = name;
+                if (!_.isUndefined(year)) {
+                    result.title = `${name} (${year})`;
+                }
+                const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
+                result.input_message_content = {
+                    message_text: `${url}`,
+                    parse_mode: 'Markdown'
+                    // disable_web_page_preview: false
+                };
+
+                return result;
+            });
+
+            games = _.slice(_.reject(games, function (game) {
+                return _.isNull(game);
+            }), 0, 50);
+            bot.answerInlineQuery(id, games);
+        } else {
+            console.log(`Inline Query: ${request.query}`);
+            console.log(results);
+            bot.answerInlineQuery(id, []);
+        }
     });
 });
 
