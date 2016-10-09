@@ -5,6 +5,7 @@
 
 const http = require('http');
 
+const _ = require('lodash');
 const parse = require('xml2js').parseString;
 
 const client = {};
@@ -51,7 +52,7 @@ client.makeRequest = function (options) {
     return new Promise(function (resolve, reject) {
         client.httpRequest(options).then(function (xml) {
             client.parseXML(xml).then(function (data) {
-                resolve(data.items.item);
+                resolve(_.get(data, 'items.item', []));
             }).catch(function (error) {
                 reject(error);
             });
@@ -70,7 +71,7 @@ client.search = function (query) {
 
     const options = {
         hostname: 'www.boardgamegeek.com',
-        path: `\/xmlapi2\/search\?query\=${query}\&type\=boardgame\,boardgameexpansion`,
+        path: `/xmlapi2/search?query=${query}&type=boardgame,boardgameexpansion`,
         method: 'GET'
     };
 
@@ -82,7 +83,7 @@ client.search = function (query) {
 client.gameDetails = function (id) {
     const options = {
         hostname: 'www.boardgamegeek.com',
-        path: `\/xmlapi2\/thing\?id\=${id}`,
+        path: `/xmlapi2/thing?id=${id}`,
         method: 'GET'
     };
 

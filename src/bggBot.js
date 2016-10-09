@@ -15,54 +15,38 @@ const settings = require('./settings.js');
 
 const bot = new TelegramBot(settings.token, {polling: true});
 
-// COMMANDS ///////////////////////////////////////////////////////////////////
+// UTILS //////////////////////////////////////////////////////////////////////
 
-bot.onText(/\/search\ (.+)/, function (msg, match) {
-    const fromId = msg.from.id;
+const renderGameData = function (game) {
+    const gameId = game.originalId;
+    const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
 
-    bggClient.search(match[1]).then(function (results) {
-        if (_.isArray(results)) {
-            const text = _.map(results, function (game) {
-                const name = _.get(game, 'name[0].$.value', 'Unknown');
-                const year = _.get(game, 'yearpublished[0].$.value');
-                const id = _.get(game, '$.id');
-                if (!_.isUndefined(year)) {
-                    return `${name} (${year}) - ${id}`;
-                }
-                return `${name} - ${id}`;
-            }).join('\n');
-            bot.sendMessage(fromId, text);
-        } else if (_.isUndefined(results)) {
-            bot.sendMessage(fromId, 'No results');
-        } else {
-            bot.sendMessage(fromId, 'No response');
-        }
-    }).catch(function (error) {
-        bot.sendMessage(fromId, `Error: ${error}`);
+    return new Promise(function (resolve, reject) {
+        bggClient.gameDetails(gameId).then(function (results) {
+            if (_.isArray(results)) {
+                const gameDetails = _.head(results);
+                const name = _.get(gameDetails, 'name[0].$.value');
+                const year = _.get(gameDetails, 'yearpublished[0].$.value', '');
+                const minPlayers = _.get(gameDetails, 'minplayers[0].$.value', '');
+                const maxPlayers = _.get(gameDetails, 'maxplayers[0].$.value', '');
+                const playingTime = _.get(gameDetails, 'playingtime[0].$.value', '');
+
+                resolve({
+                    id: gameId,
+                    content: `[${name}](${url})\n\nPublished: ${year}\nMin players: ${minPlayers}\nMax players: ${maxPlayers}\nPlaying time: ${playingTime}`
+                });
+            } else if (_.isUndefined(results)) {
+                reject('No results');
+            } else {
+                reject('No response');
+            }
+        }).catch(function (error) {
+            reject(error);
+        });
     });
-});
+};
 
-bot.onText(/\/game\ (.+)/, function (msg, match) {
-    const fromId = msg.from.id;
-
-    bggClient.gameDetails(match[1]).then(function (results) {
-        if (_.isArray(results)) {
-            const game = _.head(results);
-            const name = _.get(game, 'name[0].$.value');
-            const description = _.get(game, 'description[0]', '');
-
-            bot.sendMessage(fromId, `${name}\n${description}`);
-        } else if (_.isUndefined(results)) {
-            bot.sendMessage(fromId, 'No results');
-        } else {
-            bot.sendMessage(fromId, 'No response');
-        }
-    }).catch(function (error) {
-        bot.sendMessage(fromId, `Error: ${error}`);
-    });
-});
-
-// INLINE /////////////////////////////////////////////////////////////////////
+// INLINE MODE ////////////////////////////////////////////////////////////////
 
 bot.on('inline_query', function (request) {
     const id = request.id;
@@ -81,16 +65,11 @@ bot.on('inline_query', function (request) {
                 const result = {type: 'article'};
 
                 result.id = uuid.v4();
+                result.originalId = gameId;
                 result.title = name;
                 if (!_.isUndefined(year)) {
                     result.title = `${name} (${year})`;
                 }
-                const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
-                result.input_message_content = {
-                    message_text: `${url}`,
-                    parse_mode: 'Markdown'
-                    // disable_web_page_preview: false
-                };
 
                 return result;
             });
@@ -98,7 +77,21 @@ bot.on('inline_query', function (request) {
             games = _.slice(_.reject(games, function (game) {
                 return _.isNull(game);
             }), 0, 50);
-            bot.answerInlineQuery(id, games);
+
+            Promise.all(_.map(games, renderGameData)).then(function (gameDetails) {
+                games = _.map(games, function (game) {
+                    const content = _.find(gameDetails, function (details) {
+                        return details.id === game.originalId;
+                    }).content;
+                    game.input_message_content = {
+                        message_text: content,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: true
+                    };
+                    return game;
+                });
+                bot.answerInlineQuery(id, games);
+            });
         } else {
             console.log(`Inline Query: ${request.query}`);
             console.log(results);
