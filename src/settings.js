@@ -2,7 +2,7 @@
 // MIT License
 
 const settings = {
-    token: 'YOUR_TELEGRAM_BOT_TOKEN',
+    token: process.env.BGG_TELEGRAM_BOT_TOKEN,
 
     maxResults: 10, // 50 is the maximum allowed by Telegram
 
