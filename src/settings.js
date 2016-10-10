@@ -4,6 +4,8 @@
 const settings = {
     token: 'YOUR_TELEGRAM_BOT_TOKEN',
 
+    maxResults: 10, // 50 is the maximum allowed by Telegram
+
     bggClient: {
         timeout: 10000, // timeout of 10s (5s is the default)
 

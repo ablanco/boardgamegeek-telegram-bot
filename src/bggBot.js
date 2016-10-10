@@ -27,8 +27,10 @@ const renderGameData = function (game) {
         bggClient('thing', {id: gameId, stats: 1}).then(function (results) {
             const gameDetails = _.get(results, 'items.item');
 
+            // console.log(gameDetails);
+
             if (!_.isUndefined(gameDetails)) {
-                const name = _.get(gameDetails, 'name.value');
+                let name = _.get(gameDetails, 'name', {value: ''});
                 let rank = _.get(gameDetails, 'statistics.ratings.ranks.rank', []);
                 const year = _.get(gameDetails, 'yearpublished.value', '');
                 const minPlayers = _.get(gameDetails, 'minplayers.value', '');
@@ -36,6 +38,13 @@ const renderGameData = function (game) {
                 const playingTime = _.get(gameDetails, 'playingtime.value', '');
                 const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
                 const description = _.get(gameDetails, 'description', '');
+
+                if (_.isArray(name)) {
+                    name = _.find(name, function (item) {
+                        return item.type === 'primary';
+                    });
+                }
+                name = _.get(name, 'value', '');
 
                 if (!_.isArray(rank)) {
                     rank = [rank];
@@ -81,16 +90,20 @@ const logErrors = function (query, id, error) {
 bot.on('inline_query', function (request) {
     const inlineId = request.id;
 
-    console.log(`Querying ${request.query}`);
+    // console.log(`Querying ${request.query}`);
+
+    if (request.query.trim().length === 0) {
+        bot.answerInlineQuery(inlineId, []);
+    }
 
     bggClient('search', {
-        query: request.query,
+        query: request.query.trim(),
         type: 'boardgame,boardgameexpansion'
     }).then(function (results) {
         results = _.get(results, 'items.item');
 
         if (!_.isUndefined(results)) {
-            console.log(`Got ${results.length} results`);
+            // console.log(`Got ${results.length} results`);
 
             let games = _.map(results, function (game) {
                 const gameId = _.get(game, 'id', null);
@@ -115,14 +128,16 @@ bot.on('inline_query', function (request) {
 
             games = _.slice(_.reject(games, function (game) {
                 return _.isNull(game);
-            }), 0, 50);
+            }), 0, settings.maxResults);
+
+            // console.log(`Ketp ${games.length} results`);
 
             Promise.all(_.map(games, renderGameData)).then(function (results) {
                 const gameDetails = _.reject(results, function (result) {
                     return _.isString(result);
                 });
 
-                console.log(`Got ${gameDetails.length} game details`);
+                // console.log(`Got ${gameDetails.length} game details`);
 
                 games = _.map(games, function (game) {
                     const details = _.find(gameDetails, function (details) {
