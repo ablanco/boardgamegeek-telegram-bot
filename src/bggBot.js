@@ -66,6 +66,12 @@ Playing time: ${playingTime}
     });
 };
 
+const logErrors = function (query, id, error) {
+    console.error(`Inline Query: ${query}`);
+    console.error(error);
+    bot.answerInlineQuery(id, []);
+};
+
 // INLINE MODE ////////////////////////////////////////////////////////////////
 
 bot.on('inline_query', function (request) {
@@ -115,12 +121,14 @@ bot.on('inline_query', function (request) {
                     return game;
                 });
                 bot.answerInlineQuery(id, games);
+            }).catch(function (errors) {
+                logErrors(request.query, id, errors);
             });
         } else {
-            console.log(`Inline Query: ${request.query}`);
-            console.log(results);
-            bot.answerInlineQuery(id, []);
+            logErrors(request.query, id, results);
         }
+    }).catch(function (error) {
+        logErrors(request.query, id, error);
     });
 });
 
