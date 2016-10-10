@@ -26,14 +26,34 @@ const renderGameData = function (game) {
             if (_.isArray(results)) {
                 const gameDetails = _.head(results);
                 const name = _.get(gameDetails, 'name[0].$.value');
+                let rank = _.get(gameDetails, 'statistics[0].ratings[0].ranks[0].rank', []);
                 const year = _.get(gameDetails, 'yearpublished[0].$.value', '');
                 const minPlayers = _.get(gameDetails, 'minplayers[0].$.value', '');
                 const maxPlayers = _.get(gameDetails, 'maxplayers[0].$.value', '');
                 const playingTime = _.get(gameDetails, 'playingtime[0].$.value', '');
+                const cover = _.get(gameDetails, 'thumbnail[0]', '//i.imgur.com/zBdJWnB.pngm');
+                const description = _.get(gameDetails, 'description[0]', '');
+
+                rank = _.find(rank, function (ranking) {
+                    return _.get(ranking, '$.name', '') === 'boardgame';
+                });
+                if (_.isUndefined(rank)) {
+                    rank = '';
+                } else {
+                    rank = _.get(rank, '$.value', '');
+                }
 
                 resolve({
                     id: gameId,
-                    content: `[${name}](${url})\n\nPublished: ${year}\nMin players: ${minPlayers}\nMax players: ${maxPlayers}\nPlaying time: ${playingTime}`
+                    cover: `http:${cover}`,
+                    description: description,
+                    content: `*${name}*
+Rank: ${rank}
+Published: ${year}
+Players: ${minPlayers} - ${maxPlayers}
+Playing time: ${playingTime}
+
+[Open in BGG](${url})`
                 });
             } else if (_.isUndefined(results)) {
                 reject('No results');
@@ -80,14 +100,18 @@ bot.on('inline_query', function (request) {
 
             Promise.all(_.map(games, renderGameData)).then(function (gameDetails) {
                 games = _.map(games, function (game) {
-                    const content = _.find(gameDetails, function (details) {
+                    const details = _.find(gameDetails, function (details) {
                         return details.id === game.originalId;
-                    }).content;
+                    });
                     game.input_message_content = {
-                        message_text: content,
+                        message_text: details.content,
                         parse_mode: 'Markdown',
-                        disable_web_page_preview: true
+                        disable_web_page_preview: false
                     };
+                    game.thumb_url = details.cover;
+                    game.description = _.truncate(details.description, {
+                        length: 100
+                    });
                     return game;
                 });
                 bot.answerInlineQuery(id, games);

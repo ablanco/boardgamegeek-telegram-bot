@@ -78,12 +78,12 @@ client.search = function (query) {
     return client.makeRequest(options);
 };
 
-// https://www.boardgamegeek.com/xmlapi2/thing/?id=173064
+// https://www.boardgamegeek.com/xmlapi2/thing/?id=173064&stats=1
 
 client.gameDetails = function (id) {
     const options = {
         hostname: 'www.boardgamegeek.com',
-        path: `/xmlapi2/thing?id=${id}`,
+        path: `/xmlapi2/thing?id=${id}&stats=1`,
         method: 'GET'
     };
 
