@@ -2,7 +2,15 @@
 
 [![Code Climate](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot/badges/gpa.svg)](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot)
 
-A Telegram bot for the BoardGameGeek
+A Telegram bot for the BoardGameGeek.
+
+It works in inline mode. Write `@the_bgg_bot <game_name>` in any Telegram chat
+and you'll get a menu where you can choose the game you want to share.
+
+This bot makes use of the BGG's
+[xmlapi2](https://boardgamegeek.com/wiki/page/BGG_XML_API2).
+
+![Example of bot usage](http://i.imgur.com/Tirb9Dv.gif)
 
 ## Boring Legal Stuff
 
