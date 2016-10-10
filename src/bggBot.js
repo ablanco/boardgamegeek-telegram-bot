@@ -21,7 +21,7 @@ const renderGameData = function (game) {
     const gameId = game.originalId;
     const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
         bggClient.gameDetails(gameId).then(function (results) {
             if (_.isArray(results)) {
                 const gameDetails = _.head(results);
@@ -49,19 +49,19 @@ const renderGameData = function (game) {
                     description: description,
                     content: `*${name}*
 Rank: ${rank}
-Published: ${year}
+Published in: ${year}
 Players: ${minPlayers} - ${maxPlayers}
 Playing time: ${playingTime}
 
 [Open in BGG](${url})`
                 });
             } else if (_.isUndefined(results)) {
-                reject('No results');
+                resolve('No results');
             } else {
-                reject('No response');
+                resolve('No response');
             }
         }).catch(function (error) {
-            reject(error);
+            resolve(`ERROR: ${error}`);
         });
     });
 };
@@ -77,8 +77,12 @@ const logErrors = function (query, id, error) {
 bot.on('inline_query', function (request) {
     const id = request.id;
 
+    // console.log(`Querying ${request.query}`);
+
     bggClient.search(request.query).then(function (results) {
         if (_.isArray(results)) {
+            // console.log(`Got ${results.length} results`);
+
             let games = _.map(results, function (game) {
                 const gameId = _.get(game, '$.id', null);
 
@@ -104,11 +108,19 @@ bot.on('inline_query', function (request) {
                 return _.isNull(game);
             }), 0, 50);
 
-            Promise.all(_.map(games, renderGameData)).then(function (gameDetails) {
+            Promise.all(_.map(games, renderGameData)).then(function (results) {
+                const gameDetails = _.reject(results, function (result) {
+                    return _.isString(result);
+                });
+
                 games = _.map(games, function (game) {
                     const details = _.find(gameDetails, function (details) {
                         return details.id === game.originalId;
                     });
+                    if (_.isUndefined(details)) {
+                        return null;
+                    }
+
                     game.input_message_content = {
                         message_text: details.content,
                         parse_mode: 'Markdown',
@@ -120,9 +132,11 @@ bot.on('inline_query', function (request) {
                     });
                     return game;
                 });
+                games = _.reject(games, function (game) {
+                    return _.isNull(game);
+                });
+
                 bot.answerInlineQuery(id, games);
-            }).catch(function (errors) {
-                logErrors(request.query, id, errors);
             });
         } else {
             logErrors(request.query, id, results);

@@ -18,6 +18,8 @@ client.httpRequest = function (options) {
     return new Promise(function (resolve, reject) {
         let data = '';
 
+        // console.log(`Requesting http://${options.hostname}${options.path}`);
+
         const request = http.request(options, function (response) {
             response.on('data', function (chunk) {
                 data = data + chunk;
@@ -28,7 +30,7 @@ client.httpRequest = function (options) {
         });
 
         request.on('error', function (e) {
-            reject(e.mesage);
+            reject(`${e.message} -> http://${options.hostname}${options.path}`);
         });
 
         request.end();
@@ -52,7 +54,11 @@ client.makeRequest = function (options) {
     return new Promise(function (resolve, reject) {
         client.httpRequest(options).then(function (xml) {
             client.parseXML(xml).then(function (data) {
-                resolve(_.get(data, 'items.item', []));
+                const results = _.get(data, 'items.item');
+                if (_.isUndefined(results)) {
+                    reject('503 error');
+                }
+                resolve(results);
             }).catch(function (error) {
                 reject(error);
             });
