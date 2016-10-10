@@ -3,13 +3,13 @@
 
 'use strict';
 
+const settings = require('./settings.js');
+
 const TelegramBot = require('node-telegram-bot-api');
 
+const bggClient = require('bgg')(settings.bggClient);
 const _ = require('lodash');
 const uuid = require('node-uuid');
-
-const bggClient = require('./bggClient.js');
-const settings = require('./settings.js');
 
 // TELEGRAM BOT ///////////////////////////////////////////////////////////////
 
@@ -21,26 +21,32 @@ const renderGameData = function (game) {
     const gameId = game.originalId;
     const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
 
-    return new Promise(function (resolve) {
-        bggClient.gameDetails(gameId).then(function (results) {
-            if (_.isArray(results)) {
-                const gameDetails = _.head(results);
-                const name = _.get(gameDetails, 'name[0].$.value');
-                let rank = _.get(gameDetails, 'statistics[0].ratings[0].ranks[0].rank', []);
-                const year = _.get(gameDetails, 'yearpublished[0].$.value', '');
-                const minPlayers = _.get(gameDetails, 'minplayers[0].$.value', '');
-                const maxPlayers = _.get(gameDetails, 'maxplayers[0].$.value', '');
-                const playingTime = _.get(gameDetails, 'playingtime[0].$.value', '');
-                const cover = _.get(gameDetails, 'thumbnail[0]', '//i.imgur.com/zBdJWnB.pngm');
-                const description = _.get(gameDetails, 'description[0]', '');
+    // console.log('Requesting ' + url);
 
+    return new Promise(function (resolve) {
+        bggClient('thing', {id: gameId, stats: 1}).then(function (results) {
+            const gameDetails = _.get(results, 'items.item');
+
+            if (!_.isUndefined(gameDetails)) {
+                const name = _.get(gameDetails, 'name.value');
+                let rank = _.get(gameDetails, 'statistics.ratings.ranks.rank', []);
+                const year = _.get(gameDetails, 'yearpublished.value', '');
+                const minPlayers = _.get(gameDetails, 'minplayers.value', '');
+                const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
+                const playingTime = _.get(gameDetails, 'playingtime.value', '');
+                const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
+                const description = _.get(gameDetails, 'description', '');
+
+                if (!_.isArray(rank)) {
+                    rank = [rank];
+                }
                 rank = _.find(rank, function (ranking) {
-                    return _.get(ranking, '$.name', '') === 'boardgame';
+                    return _.get(ranking, 'name', '') === 'boardgame';
                 });
                 if (_.isUndefined(rank)) {
                     rank = '';
                 } else {
-                    rank = _.get(rank, '$.value', '');
+                    rank = _.get(rank, 'value', '');
                 }
 
                 resolve({
@@ -55,10 +61,8 @@ Playing time: ${playingTime}
 
 [Open in BGG](${url})`
                 });
-            } else if (_.isUndefined(results)) {
-                resolve('No results');
             } else {
-                resolve('No response');
+                resolve('No results');
             }
         }).catch(function (error) {
             resolve(`ERROR: ${error}`);
@@ -75,23 +79,28 @@ const logErrors = function (query, id, error) {
 // INLINE MODE ////////////////////////////////////////////////////////////////
 
 bot.on('inline_query', function (request) {
-    const id = request.id;
+    const inlineId = request.id;
 
-    // console.log(`Querying ${request.query}`);
+    console.log(`Querying ${request.query}`);
 
-    bggClient.search(request.query).then(function (results) {
-        if (_.isArray(results)) {
-            // console.log(`Got ${results.length} results`);
+    bggClient('search', {
+        query: request.query,
+        type: 'boardgame,boardgameexpansion'
+    }).then(function (results) {
+        results = _.get(results, 'items.item');
+
+        if (!_.isUndefined(results)) {
+            console.log(`Got ${results.length} results`);
 
             let games = _.map(results, function (game) {
-                const gameId = _.get(game, '$.id', null);
+                const gameId = _.get(game, 'id', null);
 
                 if (_.isNull(gameId)) {
                     return null;
                 }
 
-                const name = _.get(game, 'name[0].$.value', 'Unknown');
-                const year = _.get(game, 'yearpublished[0].$.value');
+                const name = _.get(game, 'name.value', 'Unknown');
+                const year = _.get(game, 'yearpublished.value');
                 const result = {type: 'article'};
 
                 result.id = uuid.v4();
@@ -112,6 +121,8 @@ bot.on('inline_query', function (request) {
                 const gameDetails = _.reject(results, function (result) {
                     return _.isString(result);
                 });
+
+                console.log(`Got ${gameDetails.length} game details`);
 
                 games = _.map(games, function (game) {
                     const details = _.find(gameDetails, function (details) {
@@ -136,13 +147,13 @@ bot.on('inline_query', function (request) {
                     return _.isNull(game);
                 });
 
-                bot.answerInlineQuery(id, games);
+                bot.answerInlineQuery(inlineId, games);
             });
         } else {
-            logErrors(request.query, id, results);
+            logErrors(request.query, inlineId, 'No results');
         }
     }).catch(function (error) {
-        logErrors(request.query, id, error);
+        logErrors(request.query, inlineId, error);
     });
 });
 
