@@ -85,6 +85,20 @@ const logErrors = function (query, id, error) {
     bot.answerInlineQuery(id, []);
 };
 
+// COMMANDS ///////////////////////////////////////////////////////////////////
+
+const helpText =
+        'This bot is intended to be used in inline mode, just type ' +
+        '@the_bgg_bot and a board game name in any chat.';
+
+bot.onText(/\/start.*/, function (msg) {
+    bot.sendMessage(msg.from.id, helpText);
+});
+
+bot.onText(/\/help.*/, function (msg) {
+    bot.sendMessage(msg.from.id, helpText);
+});
+
 // INLINE MODE ////////////////////////////////////////////////////////////////
 
 bot.on('inline_query', function (request) {
