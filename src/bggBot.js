@@ -36,6 +36,7 @@ const renderGameData = function (game) {
                 const minPlayers = _.get(gameDetails, 'minplayers.value', '');
                 const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
                 const playingTime = _.get(gameDetails, 'playingtime.value', '');
+                let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
                 const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
                 const description = _.get(gameDetails, 'description', '');
 
@@ -58,12 +59,17 @@ const renderGameData = function (game) {
                     rank = _.get(rank, 'value', '');
                 }
 
+                if (_.isNumber(average)) {
+                    average = average.toFixed(1);
+                }
+
                 resolve({
                     id: gameId,
                     cover: `http:${cover}`,
                     description: description,
                     content: `*${name}*
 Rank: ${rank}
+Average rating: ${average}
 Published in: ${year}
 Players: ${minPlayers} - ${maxPlayers}
 Playing time: ${playingTime}
@@ -113,6 +119,7 @@ bot.on('inline_query', function (request) {
     bggClient('search', {
         query: request.query.trim(),
         type: 'boardgame,boardgameexpansion'
+        // exact: 1
     }).then(function (results) {
         results = _.get(results, 'items.item');
 
