@@ -37,8 +37,10 @@ const renderGameData = function (game) {
                 const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
                 const playingTime = _.get(gameDetails, 'playingtime.value', '');
                 let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
+                let weight = _.get(gameDetails, 'statistics.ratings.averageweight.value', '');
                 const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
                 const description = _.get(gameDetails, 'description', '');
+                let links = _.get(gameDetails, 'link', []);
 
                 if (_.isArray(name)) {
                     name = _.find(name, function (item) {
@@ -46,6 +48,16 @@ const renderGameData = function (game) {
                     });
                 }
                 name = _.get(name, 'value', '');
+
+                if (!_.isArray(links)) {
+                    links = [links];
+                }
+                links = _.filter(links, function (link) {
+                    return _.get(link, 'type', '') === 'boardgamedesigner';
+                });
+                const designers = _.map(links, function (link) {
+                    return _.get(link, 'value', '');
+                }).join(', ');
 
                 if (!_.isArray(rank)) {
                     rank = [rank];
@@ -63,13 +75,19 @@ const renderGameData = function (game) {
                     average = average.toFixed(1);
                 }
 
+                if (_.isNumber(weight)) {
+                    weight = weight.toFixed(2);
+                }
+
                 resolve({
                     id: gameId,
                     cover: `http:${cover}`,
                     description: description,
                     content: `*${name}*
+Designer(s): ${designers}
 Rank: ${rank}
 Average rating: ${average}
+Weight: ${weight}
 Published in: ${year}
 Players: ${minPlayers} - ${maxPlayers}
 Playing time: ${playingTime}
