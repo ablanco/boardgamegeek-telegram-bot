@@ -10,7 +10,7 @@ and you'll get a menu where you can choose the game you want to share.
 This bot makes use of the BGG's
 [xmlapi2](https://boardgamegeek.com/wiki/page/BGG_XML_API2).
 
-![Example of bot usage](http://i.imgur.com/Tirb9Dv.gif)
+![Example of bot usage](http://i.imgur.com/17EBjFn.gif)
 
 ## Boring Legal Stuff
 
