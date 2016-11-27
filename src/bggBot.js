@@ -17,6 +17,21 @@ const bot = new TelegramBot(settings.token, {polling: true});
 
 // UTILS //////////////////////////////////////////////////////////////////////
 
+const getItemValue = function (list, filter, join) {
+    if (!_.isArray(list)) {
+        list = [list];
+    }
+    if (!_.isUndefined(filter)) {
+        list = _.filter(list, filter);
+    }
+    if (_.isUndefined(join)) {
+        join = '';
+    }
+    return _.map(list, function (item) {
+        return _.get(item, 'value', '');
+    }).join(join);
+};
+
 const renderGameData = function (game) {
     const gameId = game.originalId;
     const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
@@ -30,46 +45,29 @@ const renderGameData = function (game) {
             // console.log(gameDetails);
 
             if (!_.isUndefined(gameDetails)) {
-                let name = _.get(gameDetails, 'name', {value: ''});
+                let name = _.get(gameDetails, 'name', []);
+                let designers = _.get(gameDetails, 'link', []);
                 let rank = _.get(gameDetails, 'statistics.ratings.ranks.rank', []);
+                let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
+                let weight = _.get(gameDetails, 'statistics.ratings.averageweight.value', '');
                 const year = _.get(gameDetails, 'yearpublished.value', '');
                 const minPlayers = _.get(gameDetails, 'minplayers.value', '');
                 const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
                 const playingTime = _.get(gameDetails, 'playingtime.value', '');
-                let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
-                let weight = _.get(gameDetails, 'statistics.ratings.averageweight.value', '');
                 const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
                 const description = _.get(gameDetails, 'description', '');
-                let links = _.get(gameDetails, 'link', []);
 
-                if (_.isArray(name)) {
-                    name = _.find(name, function (item) {
-                        return item.type === 'primary';
-                    });
-                }
-                name = _.get(name, 'value', '');
-
-                if (!_.isArray(links)) {
-                    links = [links];
-                }
-                links = _.filter(links, function (link) {
-                    return _.get(link, 'type', '') === 'boardgamedesigner';
+                name = getItemValue(name, function (name) {
+                    return _.get(name, 'type', '') === 'primary';
                 });
-                const designers = _.map(links, function (link) {
-                    return _.get(link, 'value', '');
-                }).join(', ');
 
-                if (!_.isArray(rank)) {
-                    rank = [rank];
-                }
-                rank = _.find(rank, function (ranking) {
+                designers = getItemValue(designers, function (link) {
+                    return _.get(link, 'type', '') === 'boardgamedesigner';
+                }, ', ');
+
+                rank = getItemValue(rank, function (ranking) {
                     return _.get(ranking, 'name', '') === 'boardgame';
                 });
-                if (_.isUndefined(rank)) {
-                    rank = '';
-                } else {
-                    rank = _.get(rank, 'value', '');
-                }
 
                 if (_.isNumber(average)) {
                     average = average.toFixed(1);
