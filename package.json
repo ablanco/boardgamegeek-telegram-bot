@@ -1,6 +1,6 @@
 {
   "name": "boardgamegeek-telegram-bot",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A Telegram bot for the BoardGameGeek.",
   "author": "Alejandro Blanco <alejandro.b.e@gmail.com>",
   "homepage": "https://github.com/ablanco/boardgamegeek-telegram-bot",
