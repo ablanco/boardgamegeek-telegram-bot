@@ -189,6 +189,7 @@ bot.on('inline_query', function (request) {
                         parse_mode: 'Markdown',
                         disable_web_page_preview: false
                     };
+                    details.cover = details.cover.replace('http:https', 'https');
                     game.thumb_url = details.cover;
                     game.description = _.truncate(details.description, {
                         length: 100
