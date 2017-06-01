@@ -130,6 +130,7 @@ bot.on('inline_query', function (request) {
 
     if (request.query.trim().length === 0) {
         bot.answerInlineQuery(inlineId, []);
+        return;
     }
 
     bggClient('search', {
