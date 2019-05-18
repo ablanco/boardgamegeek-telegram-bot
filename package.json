@@ -21,8 +21,8 @@
   "license": "MIT",
   "dependencies": {
     "bgg": "^1.0.1",
-    "lodash": "^4.16.4",
-    "node-telegram-bot-api": "^0.23.3",
-    "node-uuid": "^1.4.7"
+    "lodash": "^4.17.11",
+    "node-telegram-bot-api": "^0.30.0",
+    "node-uuid": "^1.4.8"
   }
 }

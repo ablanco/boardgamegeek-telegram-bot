@@ -1,7 +1,7 @@
 # boardgamegeek-telegram-bot
 
 [![Code Climate](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot/badges/gpa.svg)](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fablanco%2Fboardgamegeek-telegram-bot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fablanco%2Fboardgamegeek-telegram-bot?ref=badge_shield)
+[![David](https://david-dm.org/ablanco/boardgamegeek-telegram-bot.svg)](https://david-dm.org/ablanco/boardgamegeek-telegram-bot)
 
 A Telegram bot for the BoardGameGeek.
 
@@ -36,7 +36,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fablanco%2Fboardgamegeek-telegram-bot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fablanco%2Fboardgamegeek-telegram-bot?ref=badge_large)
