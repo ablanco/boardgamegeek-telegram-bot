@@ -22,7 +22,7 @@
   "dependencies": {
     "bgg": "^1.0.1",
     "lodash": "^4.17.19",
-    "node-telegram-bot-api": "^0.40.0",
+    "node-telegram-bot-api": "^0.50.0",
     "node-uuid": "^1.4.8"
   }
 }
