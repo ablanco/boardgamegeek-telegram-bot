@@ -32,6 +32,25 @@ const getItemValue = function (list, filter, join) {
     }).join(join);
 };
 
+const sortGamesByRelevance = function (games, query) {
+    // Relevance is calculated over the position of the queried term in the game's name
+
+    return _.sortBy(games, [function (game) {
+        const name = game.title.toLowerCase();
+        let relevance = name.indexOf(query);
+
+        if (relevance < 0) {
+            relevance = 99999;
+        }
+
+        // console.log(`${name} has a relevance of ${relevance}`);
+
+        return relevance;
+    }, function (game) {
+        return _.get(game, 'name.value', '');
+    }]);
+};
+
 const renderGameData = function (game) {
     const gameId = game.originalId;
     const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
@@ -125,16 +144,17 @@ bot.onText(/\/help.*/, function (msg) {
 
 bot.on('inline_query', function (request) {
     const inlineId = request.id;
+    const query = request.query.trim().toLowerCase();
 
-    // console.log(`Querying ${request.query}`);
+    // console.log(`Querying ${query}`);
 
-    if (request.query.trim().length === 0) {
+    if (query.length === 0) {
         bot.answerInlineQuery(inlineId, []);
         return;
     }
 
     bggClient('search', {
-        query: request.query.trim(),
+        query: query,
         type: 'boardgame,boardgameexpansion'
         // exact: 1
     }).then(function (results) {
@@ -163,12 +183,12 @@ bot.on('inline_query', function (request) {
 
                 return result;
             });
-
-            games = _.slice(_.reject(games, function (game) {
+            games = sortGamesByRelevance(_.reject(games, function (game) {
                 return _.isNull(game);
-            }), 0, settings.maxResults);
+            }), query);
+            games = _.slice(games, 0, settings.maxResults);
 
-            // console.log(`Ketp ${games.length} results`);
+            // console.log(`Kept ${games.length} results`);
 
             Promise.all(_.map(games, renderGameData)).then(function (results) {
                 const gameDetails = _.reject(results, function (result) {
@@ -204,10 +224,10 @@ bot.on('inline_query', function (request) {
                 bot.answerInlineQuery(inlineId, games);
             });
         } else {
-            logErrors(request.query, inlineId, 'No results');
+            logErrors(query, inlineId, 'No results');
         }
     }).catch(function (error) {
-        logErrors(request.query, inlineId, error);
+        logErrors(query, inlineId, error);
     });
 });
 
