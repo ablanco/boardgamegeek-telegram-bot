@@ -69,11 +69,11 @@ const renderGameData = function (game) {
                 let rank = _.get(gameDetails, 'statistics.ratings.ranks.rank', []);
                 let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
                 let weight = _.get(gameDetails, 'statistics.ratings.averageweight.value', '');
+                let cover = _.get(gameDetails, 'thumbnail', 'https://i.imgur.com/zBdJWnB.pngm');
                 const year = _.get(gameDetails, 'yearpublished.value', '');
                 const minPlayers = _.get(gameDetails, 'minplayers.value', '');
                 const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
                 const playingTime = _.get(gameDetails, 'playingtime.value', '');
-                const cover = _.get(gameDetails, 'thumbnail', '//i.imgur.com/zBdJWnB.pngm');
                 const description = _.get(gameDetails, 'description', '');
 
                 name = getItemValue(name, function (name) {
@@ -96,9 +96,11 @@ const renderGameData = function (game) {
                     weight = weight.toFixed(2);
                 }
 
+                cover = cover.replace('&amp;&amp;#35;40;&amp;&amp;#35;41;', '()');
+
                 resolve({
                     id: gameId,
-                    cover: `http:${cover}`,
+                    cover: cover,
                     description: description,
                     content: `*${name}*
 Designer(s): ${designers}
