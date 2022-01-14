@@ -9,7 +9,6 @@ const TelegramBot = require("node-telegram-bot-api");
 
 const bggClient = require("bgg")(settings.bggClient);
 const _ = require("lodash");
-const uuid = require("node-uuid");
 
 // TELEGRAM BOT ///////////////////////////////////////////////////////////////
 
@@ -219,7 +218,7 @@ bot.on("inline_query", function (request) {
                     const year = _.get(game, "yearpublished.value");
                     const result = { type: "article" };
 
-                    result.id = uuid.v4();
+                    result.id = String(Math.random()).substring(2),
                     result.originalId = gameId;
                     result.title = name;
                     if (!_.isUndefined(year)) {
