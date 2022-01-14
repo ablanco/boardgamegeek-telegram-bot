@@ -1,19 +1,19 @@
 // Copyright (c) 2016 Alejandro Blanco <alejandro.b.e@gmail.com>
 // MIT License
 
-'use strict';
+"use strict";
 
-const settings = require('./settings.js');
+const settings = require("./settings.js");
 
-const TelegramBot = require('node-telegram-bot-api');
+const TelegramBot = require("node-telegram-bot-api");
 
-const bggClient = require('bgg')(settings.bggClient);
-const _ = require('lodash');
-const uuid = require('node-uuid');
+const bggClient = require("bgg")(settings.bggClient);
+const _ = require("lodash");
+const uuid = require("node-uuid");
 
 // TELEGRAM BOT ///////////////////////////////////////////////////////////////
 
-const bot = new TelegramBot(settings.token, {polling: true});
+const bot = new TelegramBot(settings.token, { polling: true });
 
 // UTILS //////////////////////////////////////////////////////////////////////
 
@@ -25,30 +25,33 @@ const getItemValue = function (list, filter, join) {
         list = _.filter(list, filter);
     }
     if (_.isUndefined(join)) {
-        join = '';
+        join = "";
     }
     return _.map(list, function (item) {
-        return _.get(item, 'value', '');
+        return _.get(item, "value", "");
     }).join(join);
 };
 
 const sortGamesByRelevance = function (games, query) {
     // Relevance is calculated over the position of the queried term in the game's name
 
-    return _.sortBy(games, [function (game) {
-        const name = game.title.toLowerCase();
-        let relevance = name.indexOf(query);
+    return _.sortBy(games, [
+        function (game) {
+            const name = game.title.toLowerCase();
+            let relevance = name.indexOf(query);
 
-        if (relevance < 0) {
-            relevance = 99999;
-        }
+            if (relevance < 0) {
+                relevance = 99999;
+            }
 
-        // console.log(`${name} has a relevance of ${relevance}`);
+            // console.log(`${name} has a relevance of ${relevance}`);
 
-        return relevance;
-    }, function (game) {
-        return _.get(game, 'name.value', '');
-    }]);
+            return relevance;
+        },
+        function (game) {
+            return _.get(game, "name.value", "");
+        },
+    ]);
 };
 
 const renderGameData = function (game) {
@@ -58,51 +61,89 @@ const renderGameData = function (game) {
     // console.log('Requesting ' + url);
 
     return new Promise(function (resolve) {
-        bggClient('thing', {id: gameId, stats: 1}).then(function (results) {
-            const gameDetails = _.get(results, 'items.item');
+        bggClient("thing", { id: gameId, stats: 1 })
+            .then(function (results) {
+                const gameDetails = _.get(results, "items.item");
 
-            // console.log(gameDetails);
+                // console.log(gameDetails);
 
-            if (!_.isUndefined(gameDetails)) {
-                let name = _.get(gameDetails, 'name', []);
-                let designers = _.get(gameDetails, 'link', []);
-                let rank = _.get(gameDetails, 'statistics.ratings.ranks.rank', []);
-                let average = _.get(gameDetails, 'statistics.ratings.average.value', '');
-                let weight = _.get(gameDetails, 'statistics.ratings.averageweight.value', '');
-                let cover = _.get(gameDetails, 'thumbnail', 'https://i.imgur.com/zBdJWnB.pngm');
-                const year = _.get(gameDetails, 'yearpublished.value', '');
-                const minPlayers = _.get(gameDetails, 'minplayers.value', '');
-                const maxPlayers = _.get(gameDetails, 'maxplayers.value', '');
-                const playingTime = _.get(gameDetails, 'playingtime.value', '');
-                const description = _.get(gameDetails, 'description', '');
+                if (!_.isUndefined(gameDetails)) {
+                    let name = _.get(gameDetails, "name", []);
+                    let designers = _.get(gameDetails, "link", []);
+                    let rank = _.get(
+                        gameDetails,
+                        "statistics.ratings.ranks.rank",
+                        []
+                    );
+                    let average = _.get(
+                        gameDetails,
+                        "statistics.ratings.average.value",
+                        ""
+                    );
+                    let weight = _.get(
+                        gameDetails,
+                        "statistics.ratings.averageweight.value",
+                        ""
+                    );
+                    let cover = _.get(
+                        gameDetails,
+                        "thumbnail",
+                        "https://i.imgur.com/zBdJWnB.pngm"
+                    );
+                    const year = _.get(gameDetails, "yearpublished.value", "");
+                    const minPlayers = _.get(
+                        gameDetails,
+                        "minplayers.value",
+                        ""
+                    );
+                    const maxPlayers = _.get(
+                        gameDetails,
+                        "maxplayers.value",
+                        ""
+                    );
+                    const playingTime = _.get(
+                        gameDetails,
+                        "playingtime.value",
+                        ""
+                    );
+                    const description = _.get(gameDetails, "description", "");
 
-                name = getItemValue(name, function (name) {
-                    return _.get(name, 'type', '') === 'primary';
-                });
+                    name = getItemValue(name, function (name) {
+                        return _.get(name, "type", "") === "primary";
+                    });
 
-                designers = getItemValue(designers, function (link) {
-                    return _.get(link, 'type', '') === 'boardgamedesigner';
-                }, ', ');
+                    designers = getItemValue(
+                        designers,
+                        function (link) {
+                            return (
+                                _.get(link, "type", "") === "boardgamedesigner"
+                            );
+                        },
+                        ", "
+                    );
 
-                rank = getItemValue(rank, function (ranking) {
-                    return _.get(ranking, 'name', '') === 'boardgame';
-                });
+                    rank = getItemValue(rank, function (ranking) {
+                        return _.get(ranking, "name", "") === "boardgame";
+                    });
 
-                if (_.isNumber(average)) {
-                    average = average.toFixed(1);
-                }
+                    if (_.isNumber(average)) {
+                        average = average.toFixed(1);
+                    }
 
-                if (_.isNumber(weight)) {
-                    weight = weight.toFixed(2);
-                }
+                    if (_.isNumber(weight)) {
+                        weight = weight.toFixed(2);
+                    }
 
-                cover = cover.replace('&amp;&amp;#35;40;&amp;&amp;#35;41;', '()');
+                    cover = cover.replace(
+                        "&amp;&amp;#35;40;&amp;&amp;#35;41;",
+                        "()"
+                    );
 
-                resolve({
-                    id: gameId,
-                    cover: cover,
-                    description: description,
-                    content: `*${name}*
+                    resolve({
+                        id: gameId,
+                        cover: cover,
+                        description: description,
+                        content: `*${name}*
 Designer(s): ${designers}
 Rank: ${rank}
 Average rating: ${average}
@@ -111,14 +152,15 @@ Published in: ${year}
 Players: ${minPlayers} - ${maxPlayers}
 Playing time: ${playingTime}
 
-[Open in BGG](${url})`
-                });
-            } else {
-                resolve('No results');
-            }
-        }).catch(function (error) {
-            resolve(`ERROR: ${error}`);
-        });
+[Open in BGG](${url})`,
+                    });
+                } else {
+                    resolve("No results");
+                }
+            })
+            .catch(function (error) {
+                resolve(`ERROR: ${error}`);
+            });
     });
 };
 
@@ -131,8 +173,8 @@ const logErrors = function (query, id, error) {
 // COMMANDS ///////////////////////////////////////////////////////////////////
 
 const helpText =
-        'This bot is intended to be used in inline mode, just type ' +
-        '@the_bgg_bot and a board game name in any chat.';
+    "This bot is intended to be used in inline mode, just type " +
+    "@the_bgg_bot and a board game name in any chat.";
 
 bot.onText(/\/start.*/, function (msg) {
     bot.sendMessage(msg.from.id, helpText);
@@ -144,7 +186,7 @@ bot.onText(/\/help.*/, function (msg) {
 
 // INLINE MODE ////////////////////////////////////////////////////////////////
 
-bot.on('inline_query', function (request) {
+bot.on("inline_query", function (request) {
     const inlineId = request.id;
     const query = request.query.trim().toLowerCase();
 
@@ -155,82 +197,92 @@ bot.on('inline_query', function (request) {
         return;
     }
 
-    bggClient('search', {
+    bggClient("search", {
         query: query,
-        type: 'boardgame,boardgameexpansion'
+        type: "boardgame,boardgameexpansion",
         // exact: 1
-    }).then(function (results) {
-        results = _.get(results, 'items.item');
+    })
+        .then(function (results) {
+            results = _.get(results, "items.item");
 
-        if (!_.isUndefined(results)) {
-            // console.log(`Got ${results.length} results`);
+            if (!_.isUndefined(results)) {
+                // console.log(`Got ${results.length} results`);
 
-            let games = _.map(results, function (game) {
-                const gameId = _.get(game, 'id', null);
+                let games = _.map(results, function (game) {
+                    const gameId = _.get(game, "id", null);
 
-                if (_.isNull(gameId)) {
-                    return null;
-                }
-
-                const name = _.get(game, 'name.value', 'Unknown');
-                const year = _.get(game, 'yearpublished.value');
-                const result = {type: 'article'};
-
-                result.id = uuid.v4();
-                result.originalId = gameId;
-                result.title = name;
-                if (!_.isUndefined(year)) {
-                    result.title = `${name} (${year})`;
-                }
-
-                return result;
-            });
-            games = sortGamesByRelevance(_.reject(games, function (game) {
-                return _.isNull(game);
-            }), query);
-            games = _.slice(games, 0, settings.maxResults);
-
-            // console.log(`Kept ${games.length} results`);
-
-            Promise.all(_.map(games, renderGameData)).then(function (results) {
-                const gameDetails = _.reject(results, function (result) {
-                    return _.isString(result);
-                });
-
-                // console.log(`Got ${gameDetails.length} game details`);
-
-                games = _.map(games, function (game) {
-                    const details = _.find(gameDetails, function (details) {
-                        return details.id === game.originalId;
-                    });
-                    if (_.isUndefined(details)) {
+                    if (_.isNull(gameId)) {
                         return null;
                     }
 
-                    game.input_message_content = {
-                        message_text: details.content,
-                        parse_mode: 'Markdown',
-                        disable_web_page_preview: false
-                    };
-                    details.cover = details.cover.replace('http:https', 'https');
-                    game.thumb_url = details.cover;
-                    game.description = _.truncate(details.description, {
-                        length: 100
-                    });
-                    return game;
-                });
-                games = _.reject(games, function (game) {
-                    return _.isNull(game);
-                });
+                    const name = _.get(game, "name.value", "Unknown");
+                    const year = _.get(game, "yearpublished.value");
+                    const result = { type: "article" };
 
-                bot.answerInlineQuery(inlineId, games);
-            });
-        } else {
-            logErrors(query, inlineId, 'No results');
-        }
-    }).catch(function (error) {
-        logErrors(query, inlineId, error);
-    });
+                    result.id = uuid.v4();
+                    result.originalId = gameId;
+                    result.title = name;
+                    if (!_.isUndefined(year)) {
+                        result.title = `${name} (${year})`;
+                    }
+
+                    return result;
+                });
+                games = sortGamesByRelevance(
+                    _.reject(games, function (game) {
+                        return _.isNull(game);
+                    }),
+                    query
+                );
+                games = _.slice(games, 0, settings.maxResults);
+
+                // console.log(`Kept ${games.length} results`);
+
+                Promise.all(_.map(games, renderGameData)).then(function (
+                    results
+                ) {
+                    const gameDetails = _.reject(results, function (result) {
+                        return _.isString(result);
+                    });
+
+                    // console.log(`Got ${gameDetails.length} game details`);
+
+                    games = _.map(games, function (game) {
+                        const details = _.find(gameDetails, function (details) {
+                            return details.id === game.originalId;
+                        });
+                        if (_.isUndefined(details)) {
+                            return null;
+                        }
+
+                        game.input_message_content = {
+                            message_text: details.content,
+                            parse_mode: "Markdown",
+                            disable_web_page_preview: false,
+                        };
+                        details.cover = details.cover.replace(
+                            "http:https",
+                            "https"
+                        );
+                        game.thumb_url = details.cover;
+                        game.description = _.truncate(details.description, {
+                            length: 100,
+                        });
+                        return game;
+                    });
+                    games = _.reject(games, function (game) {
+                        return _.isNull(game);
+                    });
+
+                    bot.answerInlineQuery(inlineId, games);
+                });
+            } else {
+                logErrors(query, inlineId, "No results");
+            }
+        })
+        .catch(function (error) {
+            logErrors(query, inlineId, error);
+        });
 });
 
 module.exports = bot;

@@ -1,28 +1,32 @@
 {
-  "name": "boardgamegeek-telegram-bot",
-  "version": "1.0.0",
-  "description": "A Telegram bot for the BoardGameGeek.",
-  "author": "Alejandro Blanco <alejandro.b.e@gmail.com>",
-  "homepage": "https://github.com/ablanco/boardgamegeek-telegram-bot",
-  "bugs": {
-    "url": "https://github.com/ablanco/boardgamegeek-telegram-bot/issues"
-  },
-  "keywords": [
-    "telegram",
-    "boardgamegeek",
-    "bgg",
-    "boardgame",
-    "bot"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ablanco/boardgamegeek-telegram-bot.git"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "bgg": "^1.0.1",
-    "lodash": "^4.17.21",
-    "node-telegram-bot-api": "^0.51.0",
-    "node-uuid": "^1.4.8"
-  }
+    "name": "boardgamegeek-telegram-bot",
+    "version": "1.0.0",
+    "description": "A Telegram bot for the BoardGameGeek.",
+    "author": "Alejandro Blanco <alejandro.b.e@gmail.com>",
+    "homepage": "https://github.com/ablanco/boardgamegeek-telegram-bot",
+    "bugs": {
+        "url": "https://github.com/ablanco/boardgamegeek-telegram-bot/issues"
+    },
+    "keywords": [
+        "telegram",
+        "boardgamegeek",
+        "bgg",
+        "boardgame",
+        "bot"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ablanco/boardgamegeek-telegram-bot.git"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "bgg": "^1.0.1",
+        "lodash": "^4.17.21",
+        "node-telegram-bot-api": "^0.56.0"
+    },
+    "devDependencies": {
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "2.5.1"
+    }
 }
