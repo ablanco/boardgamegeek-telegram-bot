@@ -100,6 +100,37 @@ const renderGameData = function (game) {
                         "maxplayers.value",
                         ""
                     );
+
+                    const polls = _.get(gameDetails, "poll", []);
+                    let suggestedPlayers = _.find(polls, function (item) {
+                        return (
+                            _.get(item, "name", "") === "suggested_numplayers"
+                        );
+                    });
+                    suggestedPlayers = _.get(suggestedPlayers, "results", []);
+                    suggestedPlayers = _.reduce(
+                        suggestedPlayers,
+                        function (result, item) {
+                            const best = _.find(
+                                    _.get(item, "result", []),
+                                    function (votes) {
+                                        return (
+                                            _.get(votes, "value", "") === "Best"
+                                        );
+                                    }
+                                ),
+                                numVotes = _.get(best, "numvotes", 0);
+                            if (numVotes > result[1]) {
+                                return [
+                                    _.get(item, "numplayers", "unknown"),
+                                    numVotes,
+                                ];
+                            }
+                            return result;
+                        },
+                        ["unknown", -1]
+                    );
+
                     const playingTime = _.get(
                         gameDetails,
                         "playingtime.value",
@@ -148,7 +179,7 @@ Rank: ${rank}
 Average rating: ${average}
 Weight: ${weight}
 Published in: ${year}
-Players: ${minPlayers} - ${maxPlayers}
+Players: ${minPlayers} - ${maxPlayers} (Best: ${suggestedPlayers[0]})
 Playing time: ${playingTime}
 
 [Open in BGG](${url})`,
@@ -218,8 +249,8 @@ bot.on("inline_query", function (request) {
                     const year = _.get(game, "yearpublished.value");
                     const result = { type: "article" };
 
-                    result.id = String(Math.random()).substring(2),
-                    result.originalId = gameId;
+                    (result.id = String(Math.random()).substring(2)),
+                        (result.originalId = gameId);
                     result.title = name;
                     if (!_.isUndefined(year)) {
                         result.title = `${name} (${year})`;
