@@ -7,7 +7,7 @@ const settings = require("./settings.js");
 
 const TelegramBot = require("node-telegram-bot-api");
 
-const bggClient = require("bgg")(settings.bggClient);
+const bggClient = require("bgg-xml-api-client");
 const _ = require("lodash");
 
 // TELEGRAM BOT ///////////////////////////////////////////////////////////////
@@ -60,9 +60,10 @@ const renderGameData = function (game) {
     // console.log('Requesting ' + url);
 
     return new Promise(function (resolve) {
-        bggClient("thing", { id: gameId, stats: 1 })
-            .then(function (results) {
-                const gameDetails = _.get(results, "items.item");
+        bggClient
+            .getBggThing({ id: gameId, stats: 1 })
+            .then(function (response) {
+                const gameDetails = _.get(response, "data.item");
 
                 // console.log(gameDetails);
 
@@ -227,13 +228,14 @@ bot.on("inline_query", function (request) {
         return;
     }
 
-    bggClient("search", {
-        query: query,
-        type: "boardgame,boardgameexpansion",
-        // exact: 1
-    })
-        .then(function (results) {
-            results = _.get(results, "items.item");
+    bggClient
+        .getBggSearch({
+            query: query,
+            type: "boardgame,boardgameexpansion",
+            // exact: 1
+        })
+        .then(function (response) {
+            const results = _.get(response, "data.item");
 
             if (!_.isUndefined(results)) {
                 // console.log(`Got ${results.length} results`);

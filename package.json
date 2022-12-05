@@ -20,7 +20,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "bgg": "^1.0.1",
+        "bgg-xml-api-client": "^0.1.12",
         "lodash": "^4.17.21",
         "node-telegram-bot-api": "^0.56.0"
     },
