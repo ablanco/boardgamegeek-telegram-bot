@@ -1,7 +1,6 @@
 # boardgamegeek-telegram-bot
 
-[![Code Climate](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot/badges/gpa.svg)](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot)
-[![David](https://david-dm.org/ablanco/boardgamegeek-telegram-bot.svg)](https://david-dm.org/ablanco/boardgamegeek-telegram-bot)
+[![Maintainability](https://api.codeclimate.com/v1/badges/36c939290fced6604834/maintainability)](https://codeclimate.com/github/ablanco/boardgamegeek-telegram-bot/maintainability)
 
 A Telegram bot for the BoardGameGeek.
 
