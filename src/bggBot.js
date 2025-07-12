@@ -108,29 +108,44 @@ const renderGameData = function (game) {
                             _.get(item, "name", "") === "suggested_numplayers"
                         );
                     });
-                    suggestedPlayers = _.get(suggestedPlayers, "results", []);
-                    suggestedPlayers = _.reduce(
-                        suggestedPlayers,
-                        function (result, item) {
-                            const best = _.find(
+                    const totalVotes = parseInt(
+                        _.get(suggestedPlayers, "totalvotes", "0"),
+                        10
+                    );
+                    if (totalVotes > 0) {
+                        suggestedPlayers = _.get(
+                            suggestedPlayers,
+                            "results",
+                            []
+                        );
+                        suggestedPlayers = _.reduce(
+                            suggestedPlayers,
+                            function (result, item) {
+                                const best = _.find(
                                     _.get(item, "result", []),
                                     function (votes) {
                                         return (
                                             _.get(votes, "value", "") === "Best"
                                         );
                                     }
-                                ),
-                                numVotes = _.get(best, "numvotes", 0);
-                            if (numVotes > result[1]) {
-                                return [
-                                    _.get(item, "numplayers", "unknown"),
-                                    numVotes,
-                                ];
-                            }
-                            return result;
-                        },
-                        ["unknown", -1]
-                    );
+                                );
+                                const numVotes = parseInt(
+                                    _.get(best, "numvotes", "0"),
+                                    10
+                                );
+                                if (numVotes > result[1]) {
+                                    return [
+                                        _.get(item, "numplayers", "unknown"),
+                                        numVotes,
+                                    ];
+                                }
+                                return result;
+                            },
+                            ["unknown", -1]
+                        );
+                    } else {
+                        suggestedPlayers = ["unknown", -1];
+                    }
 
                     const playingTime = _.get(
                         gameDetails,
