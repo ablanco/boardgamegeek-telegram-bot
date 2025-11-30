@@ -53,17 +53,24 @@ const sortGamesByRelevance = function (games, query) {
     ]);
 };
 
+const decodeHtmlEntities = function (string) {
+    // console.log(`Decoding HTML entities in string: ${string}`);
+    return string.replace(/&#(\d+);/g, function (match, dec) {
+        return String.fromCharCode(dec);
+    });
+};
+
 const renderGameData = function (game) {
     const gameId = game.originalId;
     const url = `https://boardgamegeek.com/boardgame/${gameId}/`;
 
-    // console.log('Requesting ' + url);
+    // console.log("Requesting " + url);
 
     return new Promise(function (resolve) {
         bggClient
-            .getBggThing({ id: gameId, stats: 1 })
+            .getBggThing({ id: gameId, stats: 1 }, settings.bggClient)
             .then(function (response) {
-                const gameDetails = _.get(response, "data.item");
+                const gameDetails = _.get(response, "item");
 
                 // console.log(gameDetails);
 
@@ -189,7 +196,7 @@ const renderGameData = function (game) {
                         id: gameId,
                         cover: cover,
                         description: description,
-                        content: `*${name}*
+                        content: `*${decodeHtmlEntities(name)}*
 Designer(s): ${designers}
 Rank: ${rank}
 Average rating: ${average}
@@ -244,13 +251,18 @@ bot.on("inline_query", function (request) {
     }
 
     bggClient
-        .getBggSearch({
-            query: query,
-            type: "boardgame,boardgameexpansion",
-            // exact: 1
-        })
+        .getBggSearch(
+            {
+                query: query,
+                type: ["boardgame", "boardgameexpansion"],
+                // exact: 1
+            },
+            settings.bggClient
+        )
         .then(function (response) {
-            const results = _.get(response, "data.item");
+            // console.log(`Query response: ${JSON.stringify(response)}`);
+
+            const results = _.get(response, "item");
 
             if (!_.isUndefined(results)) {
                 // console.log(`Got ${results.length} results`);
@@ -262,7 +274,9 @@ bot.on("inline_query", function (request) {
                         return null;
                     }
 
-                    const name = _.get(game, "name.value", "Unknown");
+                    const name = decodeHtmlEntities(
+                        _.get(game, "name.value", "Unknown")
+                    );
                     const year = _.get(game, "yearpublished.value");
                     const result = { type: "article" };
 

@@ -7,15 +7,8 @@ const settings = {
     maxResults: 10, // 50 is the maximum allowed by Telegram
 
     bggClient: {
-        timeout: 10000, // timeout of 10s (5s is the default)
-
-        // see   https://github.com/cujojs/rest/blob/master/docs/interceptors.md#module-rest/interceptor/retry
-        retry: {
-            initial: 100,
-            multiplier: 2,
-            max: 15e3
-        }
-    }
+        authorizationKey: "", // https://boardgamegeek.com/using_the_xml_api#toc10
+    },
 };
 
 module.exports = settings;

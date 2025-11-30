@@ -8,9 +8,11 @@ It works in inline mode. Write `@the_bgg_bot <game_name>` in any Telegram chat
 and you'll get a menu where you can choose the game you want to share.
 
 This bot makes use of the BGG's
-[xmlapi2](https://boardgamegeek.com/wiki/page/BGG_XML_API2).
+[xmlapi2](https://boardgamegeek.com/using_the_xml_api).
 
 ![Example of bot usage](http://i.imgur.com/17EBjFn.gif)
+
+[![Powered by BGG](https://raw.githubusercontent.com/ablanco/boardgamegeek-telegram-bot/refs/heads/master/powered_by_BGG_01_SM.png)](https://boardgamegeek.com/)
 
 ## Boring Legal Stuff
 
